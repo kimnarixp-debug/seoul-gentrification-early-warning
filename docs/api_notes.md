@@ -93,3 +93,10 @@ indexplot_seq(df_traj, clustering, years=['1970','1980','1990','2000','2010'], k
 - `cluster`/`find_k`의 `scaler`는 `"std"`(기본, StandardScaler) 외에 **scikit-learn 표준화 객체를 그대로 받는다** (analyze/geodemo.py: `if scaler == "std": scaler = StandardScaler()` 다음에 `scaler.fit_transform` 호출).
   - 예: `from sklearn.preprocessing import RobustScaler; cluster(..., scaler=RobustScaler())`
 - `pooling`: `"fixed"`(전 기간을 한 번에 표준화), `"pooled"`, `"unique"`(분기마다 따로 표준화한 뒤 각각 군집).
+
+## 7. 시각화 함수 확인 (4단계)
+- `animate_timeseries`: `ctxmap=None`이어도 `ctx.add_basemap(ax=ax, source=ctxmap)`를 조건 없이 호출한다(visualize/mapping.py 445행). `plot_timeseries`는 `if ctxmap:` 검사가 있다. → 배경지도 서버에 접속할 수 없거나 배경지도를 끄고 싶으면 이 함수는 쓸 수 없다.
+- 기본 배경지도 `CartoDB.Positron` 등 CARTO 타일은 2026-11 현재 API 키가 없으면 "API KEY REQUIRED" 워터마크가 찍힌다. Esri `Canvas/World_Dark_Gray_Base`는 키 없이 된다.
+- `gif_from_path`: 이미지를 `plt.imshow`로 다시 그려 저장한다(화질 저하, 여백).
+- `plot_transition_matrix(gdf, cluster_col, w_type, w_options, temporal_index, unit_index, savefig, dpi, suptitle)`: 정상 동작. 축은 유형 번호.
+- `transition(...)`이 돌려주는 `Spatial_Markov` 객체: `.p`(전체), `.P[i]`(이웃 유형 i일 때), `.T[i]`(관측 수), `.Q`, `.Q_p_value`, `.LR`, `.LR_p_value`.

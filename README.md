@@ -8,7 +8,17 @@
 - [x] 1단계: 원자료 수집 ([reports/step1_collection.md](reports/step1_collection.md)) — 7종 중 6종, 2021Q1~2026Q2
 - [x] 2단계: seoul_commerce 전처리(집객시설 제외)와 데이터 점검 ([reports/data_audit.md](reports/data_audit.md)) — 연속 관측 상권 1,418개
 - [x] 3단계: 어댑터, geosnap 입력 자료와 변수 정의 ([docs/variables.md](docs/variables.md)) — 1,418개 상권 × 17분기, 결측 없음
-- [ ] 4단계 이후: 미진행
+- [x] 4단계: 유형화(5유형)와 전이확률 ([reports/step4_types.md](reports/step4_types.md))
+- [ ] 5단계 이후: 미진행
+
+## 주요 그림 (4단계)
+![서울 상권 유형 지도 애니메이션](reports/figures/step4/types_animation.gif)
+
+![유형 이동 흐름](reports/figures/step4/type_flow.png)
+
+![한 단계 위로 올라간 상권](reports/figures/step4/ladder_map.png)
+
+![이웃 효과](reports/figures/step4/neighbor_effect.png)
 
 ## 사용한 외부 저장소
 | 저장소 | 버전 | 라이선스 | 용도 |
@@ -33,4 +43,8 @@ python3 -m venv .venv
 (cd external/seoul_commerce && uv run python ../../run/02_preprocess.py ../../data/raw/contract ../../data/processed/seoul_commerce)
 # geosnap 입력 자료 (결과 data/processed/geosnap_panel.parquet은 저장소에 포함)
 .venv/bin/python adapters/seoul_to_geosnap.py
+# 4단계: 유형 수 비교, 유형화·전이확률, 그림 (그림에는 한글 글꼴 fonts-nanum과 배경지도 접속 필요)
+.venv/bin/python run/04a_find_k.py reports/step4/find_k.csv
+.venv/bin/python run/04b_types_transitions.py reports/step4
+.venv/bin/python run/04c_figures.py reports/step4 reports/figures/step4
 ```

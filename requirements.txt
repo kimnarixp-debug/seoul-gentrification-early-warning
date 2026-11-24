@@ -5,3 +5,8 @@ ibis-framework[duckdb]
 # 1단계 형식 변환 스크립트
 pyyaml
 pyarrow
+# 4단계 그림
+folium
+plotly
+kaleido
+imageio[ffmpeg]
