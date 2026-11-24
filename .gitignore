@@ -6,3 +6,4 @@ __pycache__/
 data/raw/contract/
 data/processed/seoul_commerce/
 reports/step5/predict_log*.txt
+reports/step6/predict_log*.txt
