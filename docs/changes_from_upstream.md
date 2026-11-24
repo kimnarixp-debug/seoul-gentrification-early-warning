@@ -9,3 +9,8 @@
 - `run/00_reproduce_example07.py`: 예제 07 노트북의 호출을 그대로 옮기고 그림 저장 인자(`save_fig`, `dpi`)만 추가했다.
 
 - seoul_commerce 수집기(`collector.py`) 대신 `adapters/opendata_to_contract.py`가 같은 출력 형식(필수 컬럼 + 관리 컬럼 4개, utf-8-sig)을 만든다. 수집기가 접속하는 Open API에 이 환경에서 접속할 수 없어서다. 관리 컬럼 규칙은 `collector.py`의 것을 그대로 따랐다.
+- `run/02_preprocess.py`: seoul_commerce `preprocessing.run_preprocessing()`과 같은 함수를 같은 순서로 호출한다. 다른 점은 두 가지다.
+  1. `load_source_data()`는 원자료 7종을 모두 요구하므로, 같은 내부 함수 `_read_source_csv()`를 집객시설을 뺀 6종에만 적용했다.
+  2. 집객시설 자리에 원본과 같은 컬럼 구성의 **빈 표(0행)**를 넘긴다. seoul_commerce 코드가 스스로 `has_facilities=False`, 시설 수 결측으로 처리한다.
+  - 사유: 집객시설(OA-15580)은 Open API 전용이라 이 환경에서 받을 수 없다. 사용자가 선택안 (나)를 승인했다(2026-11-24).
+  - 영향: `full_analysis_available`이 모든 행에서 False가 되고, `analysis_exclusion_reason`에 `missing_facilities`가 붙는다. 매출·점포·유동인구 등 다른 값은 원저자 결과와 100% 일치한다(`reports/data_audit.md`).
