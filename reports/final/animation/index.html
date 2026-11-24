@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>서울 상권 17분기의 이동</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 관제실 화면처럼 차분하고 단단하게. 분기 지도가 주인공
+   IDEA: 17장의 분기 지도를 넘기는 슬라이드 필름
+   PICTURE: 화면 폭을 채우는 지도 프레임, 분기 사이 교차 전환
+   COLOUR and TYPE: 어두운 지도 배경(#141413)에 그림 속 유형 색, Noto Sans KR
+   LAYOUT: 위 제목 한 줄, 가운데 플레이어, 아래 분기 눈금과 조작부, 그 아래 읽는 법 */
+:root{color-scheme:dark;--bg:#141413;--ink:#ecebe7;--mut:#9b9a95;--line:#3a3a37;--acc:#c98500}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip}
+header{padding:20px max(3vw,16px) 10px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px}
+h1{font-size:clamp(22px,3vw,34px);line-height:1.1;margin:0;font-weight:900;text-wrap:balance}
+header p{margin:0;color:var(--mut);font-size:14px}
+.stage{position:relative;margin:0 auto;max-width:1600px;aspect-ratio:16/9;background:#111}
+.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .55s ease}
+.stage img.on{opacity:1}
+.ctrl{max-width:1600px;margin:0 auto;padding:12px max(2vw,12px) 4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+button{font:700 15px "Noto Sans KR",sans-serif;color:var(--bg);background:var(--ink);border:0;border-radius:8px;min-height:44px;padding:0 18px;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.now{font-weight:900;font-size:20px;min-width:8.5em}
+.ticks{flex:1 1 380px;display:grid;grid-template-columns:repeat(17,minmax(0,1fr));gap:3px}
+.ticks button{min-height:34px;padding:0;background:var(--line);border-radius:3px;color:var(--mut);font:400 11px "Noto Sans KR",sans-serif}
+.ticks button.done{background:#6b6a66;color:var(--ink)}
+.ticks button.cur{background:var(--ink);color:var(--bg);font-weight:700}
+select{font:15px "Noto Sans KR",sans-serif;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;min-height:44px;padding:0 10px}
+.read{max-width:1100px;margin:0 auto;padding:22px max(3vw,16px) 48px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px 34px}
+.read h2{font-size:17px;margin:0 0 4px}
+.read p{margin:0;color:var(--mut);font-size:15px}
+.k{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+details{max-width:1100px;margin:0 auto;padding:0 max(3vw,16px) 40px;color:var(--mut)}
+video{width:100%;max-width:1100px;margin-top:10px;border-radius:6px}
+@media(max-width:600px){.ticks button{font-size:0}.now{font-size:17px}}
+@media(prefers-reduced-motion:reduce){.stage img{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>서울 상권, 17분기의 이동</h1>
+  <p>2022년 1분기 → 2026년 1분기 · 외식업 1,418개 상권 · 흰 테두리 = 이번 분기에 한 단계 올라간 상권</p>
+</header>
+<div class="stage" id="stage" aria-live="polite"></div>
+<div class="ctrl">
+  <button id="play" aria-label="재생 또는 정지">❚❚ 정지</button>
+  <button class="ghost" id="prev" aria-label="이전 분기">◀</button>
+  <button class="ghost" id="next" aria-label="다음 분기">▶</button>
+  <span class="now" id="now"></span>
+  <div class="ticks" id="ticks" role="group" aria-label="분기 선택"></div>
+  <select id="speed" aria-label="재생 속도">
+    <option value="2400">느리게</option><option value="1500" selected>보통</option><option value="900">빠르게</option>
+  </select>
+</div>
+<section class="read">
+  <div><h2>지도</h2><p><span class="k" style="background:#7a7a75"></span>안정형 <span class="k" style="background:#199e70"></span>교체형 <span class="k" style="background:#3987e5"></span>쇠퇴형 <span class="k" style="background:#c98500"></span>청년상권형 <span class="k" style="background:#d55181"></span>고매출밀집형. 점선은 성수 일대 13개 상권입니다.</p></div>
+  <div><h2>흰 테두리</h2><p>바로 전 분기보다 한 단계 위(청년상권형·고매출밀집형)로 올라간 상권입니다. 분기마다 70~110곳이 올라가고, 비슷한 수가 내려옵니다.</p></div>
+  <div><h2>오른쪽 그래프</h2><p>유형 비중은 17분기 내내 거의 같습니다. 개별 상권은 출렁이지만 서울 전체의 구성은 안정적이라는 뜻입니다.</p></div>
+  <div><h2>아래 숫자</h2><p>2022년 1분기보다 청년상권형·고매출밀집형 상권이 몇 곳 늘었는지 보여 줍니다.</p></div>
+</section>
+<details><summary>동영상으로 보기 (교차 전환, 약 45초)</summary><video src="seoul_types_17q.mp4" controls muted playsinline preload="none"></video></details>
+<script>
+{
+  const Q=["20221","20222","20223","20224","20231","20232","20233","20234","20241","20242","20243","20244","20251","20252","20253","20254","20261"];
+  const lab=q=>`${q.slice(0,4)}년 ${q[4]}분기`;
+  const stage=document.getElementById('stage'),ticks=document.getElementById('ticks'),now=document.getElementById('now');
+  const playBtn=document.getElementById('play'),speed=document.getElementById('speed');
+  stage.innerHTML=Q.map((q,i)=>`<img src="q_${q}.jpg" alt="${lab(q)} 서울 상권 유형 지도" ${i<2?'':'loading="lazy"'} decoding="async">`).join('');
+  ticks.innerHTML=Q.map((q,i)=>`<button type="button" data-i="${i}" aria-label="${lab(q)}">${q[4]==='1'?q.slice(2,4)+'Q1':''}</button>`).join('');
+  const imgs=[...stage.querySelectorAll('img')],tb=[...ticks.querySelectorAll('button')];
+  let i=0,timer=null;
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function show(n){
+    i=(n+Q.length)%Q.length;
+    imgs.forEach((im,k)=>im.classList.toggle('on',k===i));
+    tb.forEach((b,k)=>{b.classList.toggle('cur',k===i);b.classList.toggle('done',k<i)});
+    now.textContent=lab(Q[i]);
+    const nx=imgs[(i+1)%Q.length]; if(nx.loading==='lazy') nx.loading='eager';
+  }
+  function tick(){ show(i+1); timer=setTimeout(tick,i===Q.length-1?+speed.value*2.5:+speed.value); }
+  function play(){ if(timer) return; playBtn.textContent='❚❚ 정지'; timer=setTimeout(tick,+speed.value); }
+  function stop(){ clearTimeout(timer); timer=null; playBtn.textContent='▶ 재생'; }
+  playBtn.addEventListener('click',()=>timer?stop():play());
+  document.getElementById('prev').addEventListener('click',()=>{stop();show(i-1)});
+  document.getElementById('next').addEventListener('click',()=>{stop();show(i+1)});
+  ticks.addEventListener('click',e=>{const b=e.target.closest('button');if(b){stop();show(+b.dataset.i)}});
+  speed.addEventListener('change',()=>{if(timer){stop();play()}});
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'){stop();show(i+1)} else if(e.key==='ArrowLeft'){stop();show(i-1)}
+    else if(e.key===' '&&e.target===document.body){e.preventDefault();timer?stop():play()}
+  });
+  show(0); if(reduce) stop(); else play();
+}
+</script>
+</body>
+</html>

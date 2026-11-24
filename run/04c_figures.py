@@ -129,6 +129,9 @@ def frame(q):
 
 
 frames = [frame(q) for q in quarters]
+os.makedirs(os.path.join(OUT, "frames"), exist_ok=True)  # 보고서 애니메이션 페이지용 JPEG
+for q, f in zip(quarters, frames):
+    f.save(os.path.join(OUT, "frames", f"types_{q}.jpg"), quality=82, optimize=True)
 frames[-1].save(os.path.join(OUT, "types_map_latest.png"))
 frames[0].save(os.path.join(OUT, "types_map_first.png"))
 durations = [900] * (len(frames) - 1) + [2500]

@@ -10,7 +10,8 @@
 - [x] 3단계: 어댑터, geosnap 입력 자료와 변수 정의 ([docs/variables.md](docs/variables.md)) — 1,418개 상권 × 17분기, 결측 없음
 - [x] 4단계: 유형화(5유형)와 전이확률 ([reports/step4_types.md](reports/step4_types.md))
 - [x] 5단계: 변화 경로, 조기경보, 변화 핫스팟 ([reports/step5_paths_warning.md](reports/step5_paths_warning.md))
-- [ ] 6단계 이후: 미진행
+- [x] 6단계: 과거 검증 ([reports/step6_backtest.md](reports/step6_backtest.md)) — 유형 유지 64% → 69%, 확산 경보 AUC 0.59
+- [x] 7단계: 최종 보고서·애니메이션 (`reports/final/report/index.html`, `reports/final/animation/index.html`)
 
 ## 주요 그림 (4단계)
 ![서울 상권 유형 지도 애니메이션](reports/figures/step4/types_animation.gif)
@@ -58,4 +59,9 @@ python3 -m venv .venv
 .venv/bin/python run/05b_predict.py reports/step5 300 17
 .venv/bin/python run/05c_lincs.py reports/step5
 .venv/bin/python run/05d_figures.py reports/step5 reports/figures/step5
+# 6단계: 과거 검증 / 7단계: 애니메이션
+.venv/bin/python run/05b_predict.py reports/step6 300 12
+.venv/bin/python run/06_backtest.py reports/step6
+.venv/bin/python run/06b_backtest_figure.py reports/step6 reports/figures/step6
+.venv/bin/python run/07_animation.py reports/figures/final/anim
 ```
