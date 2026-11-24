@@ -1,0 +1,4 @@
+# 분석 엔진 (설계서 6.1: 버전 고정)
+geosnap==0.17.0
+# geosnap의 DataStore(미국 예제 데이터 로딩)가 요구하지만 geosnap 설치 시 함께 깔리지 않는 의존성
+ibis-framework[duckdb]
