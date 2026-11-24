@@ -88,3 +88,8 @@ indexplot_seq(df_traj, clustering, years=['1970','1980','1990','2000','2010'], k
 - **서울 프로젝트 본 분석에는 `DataStore`가 필요 없다.** 분석 함수(cluster, transition 등)는 우리가 만든 GeoDataFrame을 직접 받으므로 이 문제의 영향을 받지 않는다.
 - 같은 네트워크 점검에서 `data.seoul.go.kr`(서울 열린데이터광장)도 차단, `openapi.seoul.go.kr`은 주소 조회 실패 → 1단계 수집기 실행이 막힐 가능성이 높다.
 - 2026-11-24 확인: openapi.seoul.go.kr:8088은 네트워크 허용 후에도 이 환경에서 주소 조회 실패. 열린데이터광장 파일 다운로드(datafile.seoul.go.kr)는 동작.
+
+## 6. 표준화 방식 (3단계에서 확인)
+- `cluster`/`find_k`의 `scaler`는 `"std"`(기본, StandardScaler) 외에 **scikit-learn 표준화 객체를 그대로 받는다** (analyze/geodemo.py: `if scaler == "std": scaler = StandardScaler()` 다음에 `scaler.fit_transform` 호출).
+  - 예: `from sklearn.preprocessing import RobustScaler; cluster(..., scaler=RobustScaler())`
+- `pooling`: `"fixed"`(전 기간을 한 번에 표준화), `"pooled"`, `"unique"`(분기마다 따로 표준화한 뒤 각각 군집).

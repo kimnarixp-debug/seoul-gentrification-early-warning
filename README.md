@@ -7,7 +7,8 @@
 - [x] 0단계: 설계서 등록, `CLAUDE.md`, geosnap 설치·API 확인 ([docs/api_notes.md](docs/api_notes.md))
 - [x] 1단계: 원자료 수집 ([reports/step1_collection.md](reports/step1_collection.md)) — 7종 중 6종, 2021Q1~2026Q2
 - [x] 2단계: seoul_commerce 전처리(집객시설 제외)와 데이터 점검 ([reports/data_audit.md](reports/data_audit.md)) — 연속 관측 상권 1,418개
-- [ ] 3단계 이후: 미진행
+- [x] 3단계: 어댑터, geosnap 입력 자료와 변수 정의 ([docs/variables.md](docs/variables.md)) — 1,418개 상권 × 17분기, 결측 없음
+- [ ] 4단계 이후: 미진행
 
 ## 사용한 외부 저장소
 | 저장소 | 버전 | 라이선스 | 용도 |
@@ -30,4 +31,6 @@ python3 -m venv .venv
 .venv/bin/python adapters/opendata_to_contract.py data/raw/seoul_opendata data/raw/contract
 # seoul_commerce 전처리 (집객시설 제외)
 (cd external/seoul_commerce && uv run python ../../run/02_preprocess.py ../../data/raw/contract ../../data/processed/seoul_commerce)
+# geosnap 입력 자료 (결과 data/processed/geosnap_panel.parquet은 저장소에 포함)
+.venv/bin/python adapters/seoul_to_geosnap.py
 ```
