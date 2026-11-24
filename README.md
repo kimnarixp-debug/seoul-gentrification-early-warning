@@ -9,7 +9,8 @@
 - [x] 2단계: seoul_commerce 전처리(집객시설 제외)와 데이터 점검 ([reports/data_audit.md](reports/data_audit.md)) — 연속 관측 상권 1,418개
 - [x] 3단계: 어댑터, geosnap 입력 자료와 변수 정의 ([docs/variables.md](docs/variables.md)) — 1,418개 상권 × 17분기, 결측 없음
 - [x] 4단계: 유형화(5유형)와 전이확률 ([reports/step4_types.md](reports/step4_types.md))
-- [ ] 5단계 이후: 미진행
+- [x] 5단계: 변화 경로, 조기경보, 변화 핫스팟 ([reports/step5_paths_warning.md](reports/step5_paths_warning.md))
+- [ ] 6단계 이후: 미진행
 
 ## 주요 그림 (4단계)
 ![서울 상권 유형 지도 애니메이션](reports/figures/step4/types_animation.gif)
@@ -19,6 +20,11 @@
 ![한 단계 위로 올라간 상권](reports/figures/step4/ladder_map.png)
 
 ![이웃 효과](reports/figures/step4/neighbor_effect.png)
+
+## 주요 그림 (5단계)
+![확산 경보](reports/figures/step5/warning_spread.png)
+
+![성수와 같은 길을 걸은 상권](reports/figures/step5/seongsu_paths.png)
 
 ## 사용한 외부 저장소
 | 저장소 | 버전 | 라이선스 | 용도 |
@@ -47,4 +53,9 @@ python3 -m venv .venv
 .venv/bin/python run/04a_find_k.py reports/step4/find_k.csv
 .venv/bin/python run/04b_types_transitions.py reports/step4
 .venv/bin/python run/04c_figures.py reports/step4 reports/figures/step4
+# 5단계: 경로, 예측(300회, 약 12분), LINC, 그림
+.venv/bin/python run/05a_paths.py reports/step5 reports/figures/step5
+.venv/bin/python run/05b_predict.py reports/step5 300 17
+.venv/bin/python run/05c_lincs.py reports/step5
+.venv/bin/python run/05d_figures.py reports/step5 reports/figures/step5
 ```

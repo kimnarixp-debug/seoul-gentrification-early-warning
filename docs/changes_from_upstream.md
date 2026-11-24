@@ -15,3 +15,4 @@
   - 사유: 집객시설(OA-15580)은 Open API 전용이라 이 환경에서 받을 수 없다. 사용자가 선택안 (나)를 승인했다(2026-11-24).
   - 영향: `full_analysis_available`이 모든 행에서 False가 되고, `analysis_exclusion_reason`에 `missing_facilities`가 붙는다. 매출·점포·유동인구 등 다른 값은 원저자 결과와 100% 일치한다(`reports/data_audit.md`).
 - 4단계 그림: geosnap `animate_timeseries`, `gif_from_path` 대신 geopandas + Pillow로 같은 방식의 애니메이션을 만들었다(`run/04c_figures.py`). 사유는 `docs/api_notes.md` 7절. 분석 결과(유형, 전이확률)는 모두 geosnap 함수 출력이다.
+- 5단계 예측: geosnap `predict_markov_labels`는 한 번에 무작위 한 번만 뽑으므로 시드 0~299로 300번 불러 비율을 확률로 썼다(`run/05b_predict.py`). 함수 자체는 그대로다.

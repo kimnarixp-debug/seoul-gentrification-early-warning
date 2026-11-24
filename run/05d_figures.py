@@ -62,10 +62,20 @@ def foot(fig, text):
 
 
 # ---------------------------------------------------------------- 경보 표
-spread = units[units["최근 1년"].isin(["안정형", "교체형", "쇠퇴형"])].copy()
+# 확산 경보 대상: 최근 1년도, 기준 분기(2026년 1분기)도 아직 안정·교체·쇠퇴형인 상권.
+# 기준 분기에 이미 청년상권형으로 바뀐 상권은 마르코프 예측이 '현재 유형'만 보므로 확률이 높게 나온다 -> 별도 표
+low = ["안정형", "교체형", "쇠퇴형"]
+already = units[units["최근 1년"].isin(low) & (units["base_type"] == "청년상권형")].copy()
+already["warn"] = already["p_청년상권형"]
+already.drop(columns="geometry").sort_values("warn", ascending=False).to_csv(
+    os.path.join(IN, "warning_spread_already_flipped.csv"), encoding="utf-8-sig")
+spread = units[units["최근 1년"].isin(low) & units["base_type"].isin(low)].copy()
 spread["warn"] = spread["p_청년상권형"]
-over = units[units["최근 1년"] == "청년상권형"].copy()
-over["warn"] = over["p_고매출밀집형"]
+over_all = units[units["최근 1년"] == "청년상권형"].copy()
+over_all["warn"] = over_all["p_고매출밀집형"]
+over_all[over_all["base_type"] == "고매출밀집형"].drop(columns="geometry").to_csv(
+    os.path.join(IN, "warning_overheat_already_flipped.csv"), encoding="utf-8-sig")
+over = over_all[over_all["base_type"] != "고매출밀집형"].copy()
 for name, d, col in [("spread", spread, "p_청년상권형"), ("overheat", over, "p_고매출밀집형")]:
     d.drop(columns="geometry").sort_values("warn", ascending=False).to_csv(
         os.path.join(IN, f"warning_{name}.csv"), encoding="utf-8-sig")
@@ -77,7 +87,8 @@ def warning_map(d, hue, title, sub, fname, label_from, top_n=12):
     units.plot(ax=ax, color="#3d3d3a", linewidth=0, zorder=1)
     cmap = LinearSegmentedColormap.from_list("w", ["#3d3d3a", hue])
     vmax = max(0.3, np.ceil(d["warn"].quantile(0.99) * 10) / 10)
-    d.sort_values("warn").plot(ax=ax, column="warn", cmap=cmap, vmin=0, vmax=vmax, linewidth=0, zorder=2)
+    vmin = np.floor(d["warn"].quantile(0.05) * 20) / 20  # 대부분 상권이 비슷한 기본 확률을 가져 하위 5%를 바닥색으로
+    d.sort_values("warn").plot(ax=ax, column="warn", cmap=cmap, vmin=vmin, vmax=vmax, linewidth=0, zorder=2)
     top = d.sort_values("warn", ascending=False).head(top_n)
     top.plot(ax=ax, facecolor="none", edgecolor="white", linewidth=1.1, zorder=3)
     for rank, (code, r) in enumerate(top.iterrows(), 1):
@@ -92,12 +103,12 @@ def warning_map(d, hue, title, sub, fname, label_from, top_n=12):
         y = y0 - rank * 0.047
         fig.text(0.64, y, f"{rank:>2}", fontsize=14, color=MUTED, ha="left", va="center", fontweight="bold")
         fig.text(0.67, y, f"{r['trade_area_name']}", fontsize=14, color=INK, va="center", fontweight="bold")
-        fig.text(0.67, y - 0.019, f"{r['district']} · 지금 {r[label_from]}", fontsize=10, color=MUTED, va="center")
+        fig.text(0.67, y - 0.019, f"{r['district']} · 최근 1년 {r[label_from]}", fontsize=10, color=MUTED, va="center")
         bx = fig.add_axes([0.85, y - 0.012, 0.09, 0.024]); bx.set_axis_off()
         bx.barh([0], [r["warn"]], color=hue, height=1); bx.set_xlim(0, vmax)
         fig.text(0.945, y, f"{r['warn'] * 100:.0f}%", fontsize=13, color=INK, va="center", fontweight="bold")
     cax = fig.add_axes([0.03, 0.08, 0.18, 0.018])
-    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(0, vmax))
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin, vmax))
     cb = fig.colorbar(sm, cax=cax, orientation="horizontal")
     cb.outline.set_visible(False); cb.ax.tick_params(colors=MUTED, labelsize=10)
     cb.ax.xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0, decimals=0))
@@ -107,9 +118,9 @@ def warning_map(d, hue, title, sub, fname, label_from, top_n=12):
 
 
 warning_map(spread, COLORS["청년상권형"], "다음 성수는 어디인가: 확산 경보",
-            f"지금 안정·교체·쇠퇴형인 {len(spread)}개 상권이 1년 뒤 청년상권형이 될 확률", "warning_spread.png", "최근 1년")
+            f"아직 안정·교체·쇠퇴형인 {len(spread)}개 상권이 1년 뒤 청년상권형이 될 확률", "warning_spread.png", "최근 1년")
 warning_map(over, COLORS["고매출밀집형"], "과열 경보",
-            f"지금 청년상권형인 {len(over)}개 상권이 1년 뒤 고매출밀집형이 될 확률", "warning_overheat.png", "최근 1년")
+            f"아직 고매출밀집형이 아닌 청년상권형 {len(over)}곳이 1년 뒤 고매출밀집형이 될 확률", "warning_overheat.png", "최근 1년")
 print("F4 done")
 
 # ---------------------------------------------------------------- 인터랙티브 경보 지도
