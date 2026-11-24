@@ -87,3 +87,4 @@ indexplot_seq(df_traj, clustering, years=['1970','1980','1990','2000','2010'], k
 - `DataStore`는 시작할 때 DuckDB `spatial` 확장을 `extensions.duckdb.org`에서 내려받는데, 이 실행 환경의 네트워크 정책이 그 주소를 막는다. 그래서 미국 예제 데이터(S3 `spatial-ucr`)를 불러오는 경로 전체가 막힌다. (S3 자체는 접속됨)
 - **서울 프로젝트 본 분석에는 `DataStore`가 필요 없다.** 분석 함수(cluster, transition 등)는 우리가 만든 GeoDataFrame을 직접 받으므로 이 문제의 영향을 받지 않는다.
 - 같은 네트워크 점검에서 `data.seoul.go.kr`(서울 열린데이터광장)도 차단, `openapi.seoul.go.kr`은 주소 조회 실패 → 1단계 수집기 실행이 막힐 가능성이 높다.
+- 2026-11-24 확인: openapi.seoul.go.kr:8088은 네트워크 허용 후에도 이 환경에서 주소 조회 실패. 열린데이터광장 파일 다운로드(datafile.seoul.go.kr)는 동작.

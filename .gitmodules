@@ -1,0 +1,3 @@
+[submodule "external/seoul_commerce"]
+	path = external/seoul_commerce
+	url = https://github.com/scksh/seoul_commerce.git

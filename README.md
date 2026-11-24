@@ -5,13 +5,14 @@
 
 ## 진행 상황
 - [x] 0단계: 설계서 등록, `CLAUDE.md`, geosnap 설치·API 확인 ([docs/api_notes.md](docs/api_notes.md))
-- [ ] 1단계 이후: 미진행
+- [x] 1단계: 원자료 수집 ([reports/step1_collection.md](reports/step1_collection.md)) — 7종 중 6종, 2021Q1~2026Q2
+- [ ] 2단계 이후: 미진행
 
 ## 사용한 외부 저장소
 | 저장소 | 버전 | 라이선스 | 용도 |
 |---|---|---|---|
 | [oturns/geosnap](https://github.com/oturns/geosnap) | v0.17.0 (`61f9537`) | BSD-3-Clause | 분석 엔진 |
-| [scksh/seoul_commerce](https://github.com/scksh/seoul_commerce) | (1단계에서 기록) | README상 MIT | 서울 데이터 수집·전처리 |
+| [scksh/seoul_commerce](https://github.com/scksh/seoul_commerce) | `b44d8f8` (git 하위 모듈 `external/seoul_commerce`) | README상 MIT (LICENSE 파일 없음) | 서울 데이터 수집·전처리 |
 
 인용: Knaap, E., & Rey, S. (2024). geosnap: The Geospatial Neighborhood Analysis Package. *Proc. SciPy 2024*. https://doi.org/10.25080/FVWM4182
 
@@ -19,7 +20,11 @@
 
 ## 재현
 ```bash
+git submodule update --init
+(cd external/seoul_commerce && uv sync)
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 .venv/bin/python run/00_api_smoke_test.py
+# 원자료(저장소에 포함) -> seoul_commerce 형식
+.venv/bin/python adapters/opendata_to_contract.py data/raw/seoul_opendata data/raw/contract
 ```
