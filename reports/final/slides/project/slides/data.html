@@ -1,0 +1,25 @@
+<section id="data" class="alt">
+<p class="badge">수업 방법론 · Tool Use (자동 수집)</p>
+<p class="eyebrow">사용한 데이터</p>
+<h2>서울시 상권 빅데이터 266만 행을 직접 모아 정리했다</h2>
+<div class="row bignums">
+<div class="card in" style="--i:0"><p class="num">266만 행</p><p class="body">내려받은 원자료<br>16개 파일, 6종</p></div>
+<div class="card in" style="--i:1"><p class="num">6,197만</p><p class="body">원자료에 담긴 값(칸)의 수</p></div>
+<div class="card in" style="--i:2"><p class="num">489MB</p><p class="body">원자료 크기<br>(압축을 푼 CSV)</p></div>
+<div class="card in" style="--i:3"><p class="num ink">22분기</p><p class="body">2021년 1분기~2026년 2분기<br>1,650개 상권 × 100개 업종</p></div>
+</div>
+<div class="stage3">
+<div class="step in" style="--i:4"><p class="k">원자료</p><p class="t">점포 168만 행 · 추정매출 48만 행(55열)</p><p class="d">+ 유동·상주·직장인구 각 3.6만 행, 상권 경계 1,650곳</p></div>
+<p class="chev">→</p>
+<div class="step in" style="--i:5"><p class="k">전처리</p><p class="t">상권 × 업종 × 분기 25.9만 행(80열)</p><p class="d">+ 성별·연령·요일·시간대 구성 299만 행 (외식업 10개 업종)</p></div>
+<p class="chev">→</p>
+<div class="step in" style="--i:6"><p class="k">분석 자료</p><p class="t">1,418개 상권 × 17분기 = 24,106행</p><p class="d">변수 7개, 빈칸 없음 (21분기 연속 관측 상권)</p></div>
+</div>
+<div class="spacer"></div>
+<p class="small">서울 열린데이터광장 · 서울시 상권분석서비스. 서울시 Open API에 접속할 수 없어 파일 다운로드와 브라우저 자동화로 직접 수집했다.</p>
+<aside>그럼 어떤 자료를 썼는지부터 보여 드리겠습니다. (숫자를 가리키며) 제가 내려받은 원자료는 16개 파일, 266만 행입니다. 칸으로 세면 6,197만 개의 값이고, 용량으로는 489MB입니다. 서울 상권 1,650곳, 업종 100개, 22개 분기가 들어 있습니다.
+
+가장 큰 것은 점포 자료 168만 행과 매출 자료 48만 행입니다. 매출 자료는 한 행에 요일별, 시간대별, 성별, 연령대별 매출까지 55개 열이 있습니다. 이걸 외식업 10개 업종으로 정리하면 상권·업종·분기 단위 25만 9천 행, 성별·연령 구성까지 풀면 299만 행이 됩니다. 마지막으로 21분기 내내 빠짐없이 관측된 상권 1,418곳을 골라 2만 4천 행의 분석 자료를 만들었습니다.
+
+수집도 쉽지 않았습니다. 서울시 Open API에 접속할 수 없어서, AI 에이전트가 브라우저를 자동으로 조작해 파일을 직접 내려받았습니다. 수업에서 배운 Tool Use를 그대로 쓴 부분입니다.</aside>
+</section>
