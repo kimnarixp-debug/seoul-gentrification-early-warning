@@ -27,7 +27,8 @@ from seoul_to_geosnap import load_boundaries
 OUT = sys.argv[1] if len(sys.argv) > 1 else "reports/step6"
 BASE, H = 12, 4
 TYPES = ["쇠퇴형", "안정형", "교체형", "청년상권형", "고매출밀집형"]
-LOW = ["안정형", "교체형", "쇠퇴형"]
+LOW = ["안정형", "교체형"]  # 5단계 경보와 같은 기준: 쇠퇴형 제외, 점포 10곳 이상
+MIN_STORES = 10
 
 t = pd.read_parquet("reports/step4/types.parquet")
 prob = pd.read_csv(os.path.join(OUT, f"predict_probs_base{BASE}.csv"), dtype={"trade_area_code": str}).set_index("trade_area_code")
@@ -90,8 +91,10 @@ def evaluate(name, cand, goal):
     return rows
 
 
-spread = df[df["p2024"].isin(LOW) & df["base"].isin(LOW)]
-over = df[(df["p2024"] == "청년상권형") & (df["base"] != "고매출밀집형")]
+panel = pd.read_parquet("data/processed/geosnap_panel.parquet")
+df["stores_recent"] = panel[(panel["t"] >= BASE - 3) & (panel["t"] <= BASE)].groupby("trade_area_code")["stores"].mean()
+spread = df[df["p2024"].isin(LOW) & df["base"].isin(LOW) & (df["stores_recent"] >= MIN_STORES)]
+over = df[(df["p2024"] == "청년상권형") & (df["base"] == "청년상권형") & (df["stores_recent"] >= MIN_STORES)]
 warn = pd.DataFrame(evaluate("확산(→청년상권형)", spread, "청년상권형") + evaluate("과열(→고매출밀집형)", over, "고매출밀집형"))
 warn.to_csv(os.path.join(OUT, "warning_performance.csv"), index=False, encoding="utf-8-sig")
 print(warn.T.to_string())

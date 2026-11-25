@@ -1,15 +1,15 @@
 <section id="method" class="alt">
-<p class="eyebrow">자료와 방법</p>
-<h2>공개된 코드를 그대로 쓰고, 서울 자료만 맞췄다</h2>
-<div class="pipe fill" style="margin-top:16px;margin-bottom:40px">
-<div class="step tall in" style="--i:0"><p class="bignum">1</p><p class="k">수집</p><p class="t">서울 열린데이터광장</p><p class="d">상권분석서비스 점포·추정매출·영역 등 6종</p></div>
-<div class="step tall in" style="--i:1"><p class="bignum">2</p><p class="k">전처리</p><p class="t">seoul_commerce</p><p class="d">외식업 10개 업종, 원저자 결과와 100% 일치</p></div>
-<div class="step tall in" style="--i:2"><p class="bignum">3</p><p class="k">유형화</p><p class="t">geosnap cluster</p><p class="d">변수 7개, k-means 5개 유형</p></div>
-<div class="step tall in" style="--i:3"><p class="bignum">4</p><p class="k">전이·경로</p><p class="t">geosnap 전이·경로</p><p class="d">이웃 6곳을 고려한 전이확률</p></div>
-<div class="step tall in" style="--i:4"><p class="bignum">5</p><p class="k">예측·검증</p><p class="t">geosnap 예측 함수</p><p class="d">300회 시뮬레이션, 2024년 4분기 기준 과거 검증</p></div>
-</div>
-
-<p class="body"><b style="color:#ecebe7">유형 변수</b> 점포당 매출 · 전년 대비 매출 증가율 · 프랜차이즈 비중 · 개업률 · 폐업률 · 20~30대 매출 비중 · 점포 밀도</p>
-<p class="small" style="margin-top:16px">분석 범위: 21분기 연속 관측된 1,418개 상권, 2022년 1분기~2026년 1분기 17분기</p>
-<aside>분석 알고리즘은 새로 만들지 않았습니다. 공개 패키지 geosnap과 서울 상권 데이터 저장소 seoul_commerce의 함수를 그대로 썼고, 서울 자료를 그 입력 형식에 맞추는 부분만 직접 작성했습니다. 전처리 결과는 원저자가 공개한 결과와 100% 일치했습니다.</aside>
+<p class="eyebrow">분석 방법</p>
+<h2>GitHub의 공개 알고리즘을 그대로 가져와 서울 자료에 적용했다</h2>
+<table class="tbl">
+<tr><th style="width:12%">단계</th><th style="width:33%">저장소 · 함수</th><th style="width:33%">하는 일</th><th style="width:22%">원리 · 근거</th></tr>
+<tr><td>전처리</td><td>scksh/seoul_commerce · preprocessing</td><td>업종별 점포·매출 결합, 증가율 계산 (원저자 결과와 100% 일치)</td><td>서울 상권 공개 코드</td></tr>
+<tr><td>유형화</td><td>oturns/geosnap · cluster, find_k</td><td>7개 변수를 표준화하고 k-means로 5개 유형</td><td>scikit-learn KMeans</td></tr>
+<tr><td>이동</td><td>geosnap · transition (knn 6곳)</td><td>유형 사이 이동 확률표를 이웃 유형별로 따로 계산</td><td>공간 마르코프 체인 (Rey 2001, PySAL giddy)</td></tr>
+<tr><td>경로</td><td>geosnap · sequence (hamming)</td><td>17분기 유형 순서끼리 거리를 재 비슷한 경로 찾기</td><td>순서열 분석 (Delmelle 2016)</td></tr>
+<tr><td>예측</td><td>geosnap · predict_markov_labels</td><td>이동 확률표로 1년 뒤 유형을 300번 모의실험</td><td>공간 마르코프 시뮬레이션</td></tr>
+</table>
+<div class="spacer"></div>
+<p class="small">직접 작성한 코드는 서울 자료를 이 함수들의 입력 형식으로 바꾸는 어댑터 하나뿐 · 분석 범위: 21분기 연속 관측된 1,418개 상권, 2022년 1분기~2026년 1분기</p>
+<aside>분석 알고리즘은 GitHub에 공개된 것을 그대로 썼습니다. 전처리는 서울 상권 데이터를 다루는 seoul_commerce 저장소, 분석은 근린 변화 분석 패키지 geosnap입니다. 유형은 k-means 군집으로, 유형 사이 이동은 공간 마르코프 체인으로, 비슷한 경로는 순서열 분석으로, 미래는 공간 마르코프 모의실험으로 구했습니다. 제가 직접 짠 코드는 서울 자료를 이 함수들 형식으로 바꾸는 어댑터뿐입니다.</aside>
 </section>

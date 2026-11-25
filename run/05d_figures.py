@@ -43,6 +43,9 @@ t = pd.read_parquet("reports/step4/types.parquet")
 period = pd.read_csv("reports/step4/period_types.csv", dtype={"trade_area_code": str}).set_index("trade_area_code")
 prob = pd.read_csv(os.path.join(IN, "predict_probs_base17.csv"), dtype={"trade_area_code": str}).set_index("trade_area_code")
 units = gpd.GeoDataFrame(b.merge(period.reset_index(), on="trade_area_code"), crs=3857).set_index("trade_area_code")
+# 최근 1년(t14~17) 평균 외식업 점포 수: 점포가 10곳 미만이면 개·폐업 한두 건에 유형이 흔들려 경보 대상에서 뺀다
+_panel = pd.read_parquet("data/processed/geosnap_panel.parquet")
+MIN_STORES = 10
 units = units.join(prob)
 xmin, ymin, xmax, ymax = units.total_bounds
 EXT = (xmin - 2500, ymin - 2500, xmax + 2500, ymax + 2500)
@@ -65,17 +68,19 @@ def foot(fig, text):
 # 확산 경보 대상: 최근 1년도, 기준 분기(2026년 1분기)도 아직 안정·교체·쇠퇴형인 상권.
 # 기준 분기에 이미 청년상권형으로 바뀐 상권은 마르코프 예측이 '현재 유형'만 보므로 확률이 높게 나온다 -> 별도 표
 low = ["안정형", "교체형", "쇠퇴형"]
+ok = ["안정형", "교체형"]  # 경보 대상. 쇠퇴형은 평균 한 분기만 머무는 일시적 상태(유지 확률 9%)라 확률이 부풀려져 제외
+units["stores_recent"] = _panel[_panel["t"] >= 14].groupby("trade_area_code")["stores"].mean()
 already = units[units["최근 1년"].isin(low) & (units["base_type"] == "청년상권형")].copy()
 already["warn"] = already["p_청년상권형"]
 already.drop(columns="geometry").sort_values("warn", ascending=False).to_csv(
     os.path.join(IN, "warning_spread_already_flipped.csv"), encoding="utf-8-sig")
-spread = units[units["최근 1년"].isin(low) & units["base_type"].isin(low)].copy()
+spread = units[units["최근 1년"].isin(ok) & units["base_type"].isin(ok) & (units["stores_recent"] >= MIN_STORES)].copy()
 spread["warn"] = spread["p_청년상권형"]
 over_all = units[units["최근 1년"] == "청년상권형"].copy()
 over_all["warn"] = over_all["p_고매출밀집형"]
 over_all[over_all["base_type"] == "고매출밀집형"].drop(columns="geometry").to_csv(
     os.path.join(IN, "warning_overheat_already_flipped.csv"), encoding="utf-8-sig")
-over = over_all[over_all["base_type"] != "고매출밀집형"].copy()
+over = over_all[(over_all["base_type"] == "청년상권형") & (over_all["stores_recent"] >= MIN_STORES)].copy()
 for name, d, col in [("spread", spread, "p_청년상권형"), ("overheat", over, "p_고매출밀집형")]:
     d.drop(columns="geometry").sort_values("warn", ascending=False).to_csv(
         os.path.join(IN, f"warning_{name}.csv"), encoding="utf-8-sig")
@@ -118,9 +123,9 @@ def warning_map(d, hue, title, sub, fname, label_from, top_n=12):
 
 
 warning_map(spread, COLORS["청년상권형"], "다음 성수는 어디인가: 확산 경보",
-            f"아직 안정·교체·쇠퇴형인 {len(spread)}개 상권이 1년 뒤 청년상권형이 될 확률", "warning_spread.png", "최근 1년")
+            f"안정·교체형 {len(spread)}곳(점포 10곳 이상)이 1년 뒤 청년상권형이 될 확률", "warning_spread.png", "최근 1년")
 warning_map(over, COLORS["고매출밀집형"], "과열 경보",
-            f"아직 고매출밀집형이 아닌 청년상권형 {len(over)}곳이 1년 뒤 고매출밀집형이 될 확률", "warning_overheat.png", "최근 1년")
+            f"청년상권형 {len(over)}곳(점포 10곳 이상)이 1년 뒤 고매출밀집형이 될 확률", "warning_overheat.png", "최근 1년")
 print("F4 done")
 
 # ---------------------------------------------------------------- 인터랙티브 경보 지도
