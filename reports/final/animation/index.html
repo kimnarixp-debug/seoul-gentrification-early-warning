@@ -21,12 +21,13 @@ header p{margin:0;color:var(--mut);font-size:14px}
 .stage{position:relative;margin:0 auto;max-width:1600px;aspect-ratio:16/9;background:#111}
 .stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .55s ease}
 .stage img.on{opacity:1}
+.stage img.blink{transition:none}
 .ctrl{max-width:1600px;margin:0 auto;padding:12px max(2vw,12px) 4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 button{font:700 15px "Noto Sans KR",sans-serif;color:var(--bg);background:var(--ink);border:0;border-radius:8px;min-height:44px;padding:0 18px;cursor:pointer}
 button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .now{font-weight:900;font-size:20px;min-width:8.5em}
-.ticks{flex:1 1 380px;display:grid;grid-template-columns:repeat(17,minmax(0,1fr));gap:3px}
+.ticks{flex:1 1 380px;display:grid;grid-template-columns:repeat(19,minmax(0,1fr));gap:3px}
 .ticks button{min-height:34px;padding:0;background:var(--line);border-radius:3px;color:var(--mut);font:400 11px "Noto Sans KR",sans-serif}
 .ticks button.done{background:#6b6a66;color:var(--ink)}
 .ticks button.cur{background:var(--ink);color:var(--bg);font-weight:700}
@@ -44,7 +45,7 @@ video{width:100%;max-width:1100px;margin-top:10px;border-radius:6px}
 <body>
 <header>
   <h1>서울 상권, 17분기의 이동</h1>
-  <p>2022년 1분기 → 2026년 1분기 · 외식업 1,418개 상권 · 흰 테두리 = 이번 분기에 한 단계 올라간 상권</p>
+  <p>2022년 1분기 → 2026년 1분기 · 외식업 1,418개 상권 · 흰 테두리 = 이번 분기에 한 단계 올라간 상권 · 끝에 “어디로 번졌나”와 “다음 성수는 어디인가”</p>
 </header>
 <div class="stage" id="stage" aria-live="polite"></div>
 <div class="ctrl">
@@ -62,27 +63,35 @@ video{width:100%;max-width:1100px;margin-top:10px;border-radius:6px}
   <div><h2>흰 테두리</h2><p>바로 전 분기보다 한 단계 위(청년상권형·고매출밀집형)로 올라간 상권입니다. 분기마다 70~110곳이 올라가고, 비슷한 수가 내려옵니다.</p></div>
   <div><h2>오른쪽 그래프</h2><p>유형 비중은 17분기 내내 거의 같습니다. 개별 상권은 출렁이지만 서울 전체의 구성은 안정적이라는 뜻입니다.</p></div>
   <div><h2>아래 숫자</h2><p>2022년 1분기보다 청년상권형·고매출밀집형 상권이 몇 곳 늘었는지 보여 줍니다.</p></div>
+  <div><h2>마지막 장면 ① 어디로 번졌나</h2><p>2022년과 최근 1년을 비교해 한 단계 위로 올라간 상권(67곳 + 6곳)과 발표에서 말하는 지명입니다.</p></div>
+  <div><h2>마지막 장면 ② 다음 성수는 어디인가</h2><p>확산 경보 상위 7곳이 깜빡입니다. 공간 마르코프 체인 모의실험 300번의 결과이며, 확률 값보다 순위로 읽습니다.</p></div>
 </section>
-<details><summary>동영상으로 보기 (교차 전환, 약 45초)</summary><video src="seoul_types_17q.mp4" controls muted playsinline preload="none"></video></details>
+<details><summary>동영상으로 보기 (교차 전환, 약 55초)</summary><video src="seoul_types_17q.mp4" controls muted playsinline preload="none"></video></details>
 <script>
 {
   const Q=["20221","20222","20223","20224","20231","20232","20233","20234","20241","20242","20243","20244","20251","20252","20253","20254","20261"];
-  const lab=q=>`${q.slice(0,4)}년 ${q[4]}분기`;
+  const Q2=[...Q,'end_ladder','end_warn'];
+  const lab=q=>q==='end_ladder'?'어디로 번졌나':q==='end_warn'?'다음 성수는 어디인가':`${q.slice(0,4)}년 ${q[4]}분기`;
+  const src=q=>q==='end_ladder'?'end_ladder.jpg':q==='end_warn'?'end_warn_on.jpg':`q_${q}.jpg`;
   const stage=document.getElementById('stage'),ticks=document.getElementById('ticks'),now=document.getElementById('now');
   const playBtn=document.getElementById('play'),speed=document.getElementById('speed');
-  stage.innerHTML=Q.map((q,i)=>`<img src="q_${q}.jpg" alt="${lab(q)} 서울 상권 유형 지도" ${i<2?'':'loading="lazy"'} decoding="async">`).join('');
-  ticks.innerHTML=Q.map((q,i)=>`<button type="button" data-i="${i}" aria-label="${lab(q)}">${q[4]==='1'?q.slice(2,4)+'Q1':''}</button>`).join('');
-  const imgs=[...stage.querySelectorAll('img')],tb=[...ticks.querySelectorAll('button')];
-  let i=0,timer=null;
+  stage.innerHTML=Q2.map((q,i)=>`<img src="${src(q)}" alt="${lab(q)} 서울 상권 지도" ${i<2?'':'loading="lazy"'} decoding="async">`).join('')+'<img class="blink" id="woff" src="end_warn_off.jpg" alt="" loading="lazy">';
+  ticks.innerHTML=Q2.map((q,i)=>`<button type="button" data-i="${i}" aria-label="${lab(q)}">${q==='end_ladder'?'번짐':q==='end_warn'?'경보':q[4]==='1'?q.slice(2,4)+'Q1':''}</button>`).join('');
+  const woff=document.getElementById('woff');
+  const imgs=[...stage.querySelectorAll('img:not(#woff)')],tb=[...ticks.querySelectorAll('button')];
+  let i=0,timer=null,blinkT=null;
+  const N=Q2.length;
   const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function show(n){
-    i=(n+Q.length)%Q.length;
+    i=(n+N)%N;
     imgs.forEach((im,k)=>im.classList.toggle('on',k===i));
     tb.forEach((b,k)=>{b.classList.toggle('cur',k===i);b.classList.toggle('done',k<i)});
-    now.textContent=lab(Q[i]);
-    const nx=imgs[(i+1)%Q.length]; if(nx.loading==='lazy') nx.loading='eager';
+    now.textContent=lab(Q2[i]);
+    clearInterval(blinkT); woff.classList.remove('on');
+    if(Q2[i]==='end_warn'&&!reduce){let k=0;blinkT=setInterval(()=>{woff.classList.toggle('on',++k%2===1&&k<12)},500)}
+    const nx=imgs[(i+1)%N]; if(nx.loading==='lazy') nx.loading='eager';
   }
-  function tick(){ show(i+1); timer=setTimeout(tick,i===Q.length-1?+speed.value*2.5:+speed.value); }
+  function tick(){ show(i+1); timer=setTimeout(tick,i>=Q.length-1?+speed.value*(i===N-1?5:3):+speed.value); }
   function play(){ if(timer) return; playBtn.textContent='❚❚ 정지'; timer=setTimeout(tick,+speed.value); }
   function stop(){ clearTimeout(timer); timer=null; playBtn.textContent='▶ 재생'; }
   playBtn.addEventListener('click',()=>timer?stop():play());
